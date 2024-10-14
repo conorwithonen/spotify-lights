@@ -1,0 +1,12 @@
+async-timeout==4.0.3
+certifi==2024.8.30
+charset-normalizer==3.3.2
+click==8.1.7
+idna==3.8
+PyDMX==0.1.0
+python-dotenv==1.0.1
+pywizlight==0.5.14
+redis==5.1.1
+requests==2.32.3
+spotipy==2.24.0
+urllib3==2.2.2
