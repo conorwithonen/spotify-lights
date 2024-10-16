@@ -1,5 +1,4 @@
-
-
+import json
 def translate_color(color_name):
     '''Translates color names to mapped RGB'''
     codes = {
@@ -11,3 +10,9 @@ def translate_color(color_name):
         'purple': (15, 0, 255)
     }
     return codes.get(color_name.lower(), None)
+
+
+def load_songs_file(filename='song_scenes_examples.json'):
+    '''Map of song titles and "Colors", returns dict'''
+    with open (filename, 'r') as file:
+        return json.load(file)

@@ -6,13 +6,13 @@ class Light:
         self.color = 'warm_white'
         self.brightness = 0
         self.scene = None
+        self.__default_scene = 0
         
     def __str__(self) -> str:
         return f'{self.brand} bulb at {self.ip}: {self.get_state()}'
     
     def turn_on(self):
         self.is_on = True
-        print('Normal turn on')
     
     def turn_off(self):
         self.is_on = False
@@ -41,4 +41,6 @@ class Light:
         
     def reset(self):
         '''Turns the bulb back to the default state'''
-        pass
+        self.scene = self.__default_scene
+    
+# Methods to update all lights, agnostic of brand

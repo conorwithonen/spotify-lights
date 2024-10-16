@@ -31,6 +31,8 @@ class TestLight(unittest.TestCase):
     def test_set_scene(self):
         self.light.set_scene('party')
         self.assertEquals(self.light.scene, 'party')
+        self.light.set_scene(7)
+        self.assertEquals(self.light.scene, 7)
         self.assertIsNone(self.light.color)
     
     def test_set_brightness(self):
@@ -51,3 +53,8 @@ class TestLight(unittest.TestCase):
             self.light.get_state(),
             {'is_on': True, 'color': 'Maroon', 'brightness':13}
             )
+        
+    def test_reset(self):
+        self.light.set_scene(4)
+        self.light.reset()
+        self.assertEqual(self.light.scene, 0)

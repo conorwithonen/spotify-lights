@@ -1,6 +1,6 @@
 import asyncio
 from src.spotify import get_currently_playing
-from src.scenes import update_light_scene
+from src.controller import update_lights
 
 WAIT_SECONDS = 2
 
@@ -26,7 +26,7 @@ async def main():
             # Change the song name and lights
             print(f'Song changed to {current_song} by {playback.get("artist")}')
             previous_song = current_song
-            await update_light_scene(playback)
+            await update_lights(playback)
 
 
 if __name__ == '__main__':

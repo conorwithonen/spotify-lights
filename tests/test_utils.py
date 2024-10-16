@@ -11,3 +11,8 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(f('Red'), (255,0, 0))
         self.assertEqual(f('blue'), (0, 0, 255))
         self.assertIsNone(f('cyan'))
+        
+    def test_load_songs_file(self):
+        f = utils.load_songs_file()
+        self.assertIsNotNone(f)
+        self.assertTrue('Lemonade' in f)
