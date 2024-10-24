@@ -1,83 +1,43 @@
-import os
+from src.lights.light import Light
+from src.utils import translate_color
 import asyncio
 from pywizlight import wizlight, PilotBuilder
 
-DEFAULT_SCENE = os.getenv('WIZ_PARTY_SCENE')
+class Wiz(Light):
+    brand = 'Wiz'
+    def __init__(self, ip):
+        super().__init__(ip, self.brand)
+        self.bulb = wizlight(ip)
+        self.__default_scene = 4
+        
+    async def turn_on(self):
+        super().turn_on()
+        await self.bulb.turn_on()
+        
+    async def turn_off(self):
+        super().turn_off()
+        await self.bulb.turn_off()
+    
+    async def set_scene(self, _scene):
+        # Wiz values Only 1 to 32. 4 is Party
+        super().set_scene(_scene)
+        pb = PilotBuilder(scene=_scene)
+        await self.bulb.turn_on(pb)
+        
+    async def set_color(self, color):
+        '''Turns on the physical bulb using the wizlight package'''
+        # TODO: Color Differences between hue and WIZ lights.
+        super().set_color(color)
 
-# List of IPs for bulbs pulled from environment
-BULBS = [
-    os.getenv('CENTER_FLOOD_IP'),
-    os.getenv('LEFT_FLOOD_IP')
-]
-
-# "Dynamic Effects"
-async def rainbow_effect(duration=10):
-    # Works okay
-# Define the rainbow colors (RGB format)
-    rainbow_colors = [
-        (255, 0, 0),    # Red
-        (255, 127, 0),  # Orange
-        (255, 255, 0),  # Yellow
-        (0, 255, 0),    # Green
-        (0, 0, 255),    # Blue
-        (75, 0, 130),   # Indigo
-        (148, 0, 211)   # Violet
-    ]
-    start_time = asyncio.get_event_loop().time()
-    while True:
-        elapsed_time = asyncio.get_event_loop().time() - start_time
-        if elapsed_time >= duration:
-            print(f"Stopping after {elapsed_time:.2f} seconds")
-            break
-        for color in rainbow_colors:
-            for bulb in BULBS:
-                await set_static_color(bulb ,color)
-            await asyncio.sleep(1)
-
-async def default_effect(duration=None):
-    for bulb in BULBS:
-        await return_to_default(bulb)
-
-# Bulb Interfaces
-async def set_warm_white(bulb_ip):
-    # Sends color data to the actual light bulb
-    bulb = wizlight(bulb_ip)
-    await bulb.turn_on(PilotBuilder(warm_white=255))
-
-async def set_static_color(bulb_ip, color):
-    # Sends color data to the actual light bulb
-    bulb = wizlight(bulb_ip)
-    await bulb.turn_on(PilotBuilder(rgb=color))
-
-async def return_to_default(bulb_ip):
-    # Sends color data to the actual light bulb
-    bulb = wizlight(bulb_ip)
-    state = await bulb.updateState()
-    current_scene = state.get_scene()
-    if current_scene != 'Party':
-        await bulb.turn_on(PilotBuilder(scene=DEFAULT_SCENE))
-
-# Controller function
-async def change_living_room_lights(rgb, duration=None):
-    # Sends either the color or effect to a bulb.
-    if type(rgb) == tuple:
-        for bulb in BULBS:
-            await set_static_color(bulb, rgb)
-    else:
-        # Effect function
-        if duration:
-            print(f'Running {rgb.__name__} for {duration} seconds...')
-        await rgb(duration)
-
-if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
-    BULBS = [
-        os.getenv('CENTER_FLOOD_IP'),
-        os.getenv('LEFT_FLOOD_IP')
-    ]
-    async def reset():
-        for bulb in BULBS:
-            await set_warm_white(bulb)
-
-    asyncio.run(reset())
+        _rgb = translate_color(color)
+        pb = PilotBuilder(rgb=_rgb)
+        await self.bulb.turn_on(pb)
+        
+    async def reset(self):
+        '''Turns the light from special colors to default'''
+        # hardware_state = await self.bulb.updateState()
+        # await self.set_scene(state.get_scene_id())
+        # if self.scene != self.default_scene:
+        await self.set_scene(self.__default_scene)
+            
+    
