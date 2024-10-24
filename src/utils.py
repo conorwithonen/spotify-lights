@@ -41,3 +41,12 @@ def rgb_to_xy(red, green, blue):
         x = X / (X + Y + Z)
         y = Y / (X + Y + Z)
         return [x, y]
+    
+def song_timestamp_to_ms(time: str):
+    '''Takes timestamp str and converts to ms'''
+    try:
+        min, sec = map(int,time.split(':'))
+        ms = (min * 60 + sec) * 1000
+        return ms
+    except ValueError:
+        raise ValueError("Invalid time format. Use m:ss")

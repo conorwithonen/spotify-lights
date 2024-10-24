@@ -1,6 +1,5 @@
 import unittest
         
-from src.classes.light import Light
 from src import utils
 
 class TestUtils(unittest.TestCase):
@@ -21,3 +20,9 @@ class TestUtils(unittest.TestCase):
         color = (255, 255, 255)
         xy = utils.rgb_to_xy(*color)
         self.assertEqual(xy, [0.32272672086556803, 0.32902290955907926])
+
+    def test_song_timestamp_to_ms(self):
+        self.assertEqual(
+            utils.song_timestamp_to_ms('2:30'),
+            150000
+        )

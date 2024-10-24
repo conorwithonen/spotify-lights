@@ -25,19 +25,19 @@ class TestLight(unittest.TestCase):
     
     def test_set_color(self):
         self.light.set_color('purple')
-        self.assertEquals(self.light.color, 'purple')
+        self.assertEqual(self.light.color, 'purple')
         self.assertIsNone(self.light.scene)
     
     def test_set_scene(self):
         self.light.set_scene('party')
-        self.assertEquals(self.light.scene, 'party')
+        self.assertEqual(self.light.scene, 'party')
         self.light.set_scene(7)
-        self.assertEquals(self.light.scene, 7)
+        self.assertEqual(self.light.scene, 7)
         self.assertIsNone(self.light.color)
     
     def test_set_brightness(self):
         self.light.set_brightness(5)
-        self.assertEquals(self.light.brightness, 5)
+        self.assertEqual(self.light.brightness, 5)
     
     def test_toggle(self):
         self.light.toggle()
