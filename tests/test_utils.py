@@ -16,3 +16,8 @@ class TestUtils(unittest.TestCase):
         f = utils.load_songs_file()
         self.assertIsNotNone(f)
         self.assertTrue('Lemonade' in f)
+
+    def test_rgb_to_xy(self):
+        color = (255, 255, 255)
+        xy = utils.rgb_to_xy(*color)
+        self.assertEqual(xy, [0.32272672086556803, 0.32902290955907926])
