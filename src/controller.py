@@ -1,6 +1,6 @@
 import os
 from src.utils import load_songs_file
-from src.classes import wiz, phillips
+from src.lights import wiz, phillips
 import asyncio
 
 SONG_FILE = 'song_scenes.json'

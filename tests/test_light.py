@@ -1,5 +1,5 @@
 import unittest
-from src.classes.light import Light
+from src.lights.light import Light
 ip = '192.168.0.100'
 brand = 'wiz'
 
