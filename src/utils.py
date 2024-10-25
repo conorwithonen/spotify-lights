@@ -43,10 +43,16 @@ def rgb_to_xy(red, green, blue):
         return [x, y]
     
 def song_timestamp_to_ms(time: str):
-    '''Takes timestamp str and converts to ms'''
+    '''Takes m:ss timestamp str and converts to ms'''
     try:
         min, sec = map(int,time.split(':'))
         ms = (min * 60 + sec) * 1000
         return ms
     except ValueError:
         raise ValueError("Invalid time format. Use m:ss")
+    
+def lookup_song(all_songs, lookup_value, lookup_key='songTitle'):
+    '''Looksup up json object in array of objects'''
+    for song in all_songs:
+        if song.get(lookup_key) == lookup_value:
+            return song
