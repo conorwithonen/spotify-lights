@@ -5,7 +5,7 @@ import asyncio
 
 SONG_FILE = 'song_scenes.json'
 SPECIAL_SONGS = load_songs_file(SONG_FILE)
-LATENCY_BUFFER_MS = 1000
+LATENCY_BUFFER_MS = 0
 
 # # Ugh
 hue_bulbs = phillips.get_hue_lights_by_name('Island')

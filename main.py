@@ -2,7 +2,7 @@ import asyncio
 from src.spotify import get_currently_playing
 from src.controller import update_lights
 
-WAIT_SECONDS = 1
+WAIT_SECONDS = 2
 
 async def main():
 
