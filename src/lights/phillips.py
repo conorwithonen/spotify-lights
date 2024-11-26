@@ -1,122 +1,62 @@
 import os
-import asyncio
+from src.lights.light import Light
+from src.utils import translate_color, rgb_to_xy
 from phue import Bridge
-import sys
-import colorsys
-
-# ----------------------------- Configuration -----------------------------
-# Replace with your Hue Bridge IP address
-BRIDGE_IP = os.getenv('HUE_BRIDGE_IP')  # Example IP; replace with your bridge's IP.
-DEFAULT_SCENE = os.getenv('NORMAL_PARTY_SCENE')
-NORMAL_SCENE = os.getenv('NORMAL_KITCHEN_SCENE')
-KITCHEN_GROUP = os.getenv('KITCHEN_GROUP')
-# ---------------------------------------------------------------------------
-
-async def rgb_to_xy(red, green, blue):
-    """Converts RGB to CIE 1931 XY color space for Hue lights."""
-    # Normalize RGB values to 0-1 range
-    r = red / 255.0
-    g = green / 255.0
-    b = blue / 255.0
-
-    # Apply gamma correction
-    r = ((r + 0.055) / (1.0 + 0.055)) ** 2.4 if r > 0.04045 else (r / 12.92)
-    g = ((g + 0.055) / (1.0 + 0.055)) ** 2.4 if g > 0.04045 else (g / 12.92)
-    b = ((b + 0.055) / (1.0 + 0.055)) ** 2.4 if b > 0.04045 else (b / 12.92)
-
-    # Convert RGB to XYZ using the Wide RGB D65 conversion formula
-    X = r * 0.664511 + g * 0.154324 + b * 0.162028
-    Y = r * 0.283881 + g * 0.668433 + b * 0.047685
-    Z = r * 0.000088 + g * 0.072310 + b * 0.986039
-
-    # Convert XYZ to xy
-    if (X + Y + Z) == 0:
-        return [0, 0]
-    else:
-        x = X / (X + Y + Z)
-        y = Y / (X + Y + Z)
-        return [x, y]
-
-async def reset_kitchen_lights():
-    # Resets kitchen to the default "Party scene"
-    try:
-        # Connect to the Hue Bridge
-        b = Bridge(BRIDGE_IP)
-        print(f"Connecting to the Hue Bridge at {BRIDGE_IP}...")
-
-        b.activate_scene(
-            scene_id=DEFAULT_SCENE,
-            group_id=KITCHEN_GROUP
-            )
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+import asyncio
 
 
-async def end_party():
-    # Resets kitchen to the default "Party scene"
-    try:
-        # Connect to the Hue Bridge
-        b = Bridge(BRIDGE_IP)
-        print(f"Connecting to the Hue Bridge at {BRIDGE_IP}...")
 
-        b.activate_scene(
-            scene_id=NORMAL_SCENE,
-            group_id=KITCHEN_GROUP
-            )
+class Hue(Light):
+    brand = 'Phillips'
+    b = Bridge(os.getenv('HUE_BRIDGE_IP'))
+    def __init__(self, phue_light, group_id):
+        super().__init__(self.b.ip, self.brand)
+        self.bulb = phue_light
+        self.__default_scene = os.getenv('NORMAL_PARTY_SCENE')
+        self.__group_id = group_id
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
-
-async def change_kitchen_lights(rgb_color):
-    try:
-        # Connect to the Hue Bridge
-        b = Bridge(BRIDGE_IP)
-        print(f"Connecting to the Hue Bridge at {BRIDGE_IP}...")
-
-        # If running for the first time, press the bridge button and uncomment the next line
-        # b.connect()
-
-        # Retrieve all lights
-        lights = b.lights
-        print(f"Total lights found: {len(lights)}")
-
-        # Filter lights with "Island" in their name (case-insensitive)
-        island_lights = [light for light in lights if 'island' in light.name.lower()]
-
-        if not island_lights:
-            print("No lights with 'Island' in their name were found.")
-            sys.exit(1)
-
-        print(f"Found {len(island_lights)} 'Island' light(s): {[light.name for light in island_lights]}")
-
-        # Convert the provided RGB color to XY format
-        xy_color = await rgb_to_xy(*rgb_color)
-        print(f"RGB {rgb_color} converted to XY: {xy_color}")
-
-        # Update each light with the new color
-        for light in island_lights:
-            print(f"Updating light '{light.name}' with XY color {xy_color}...")
-            light.on = True  # Ensure the light is turned on
-            light.xy = xy_color  # Set the xy color
-            light.brightness = 254  # Max brightness (adjust as needed)
-            print(f"Light '{light.name}' updated.")
-
-        print("All 'Island' lights have been updated.")
+        
+    async def turn_on(self):
+        super().turn_on()
+        self.bulb.on = True
+        
+    async def turn_off(self):
+        super().turn_off()
+        self.bulb.on = False
     
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+    async def set_scene(self, _scene):
+        # Wiz values Only 1 to 32. 4 is Party
+        super().set_scene(_scene)
+        self.b.activate_scene(
+            scene_id=_scene,
+            group_id=self.__group_id
+        )
+        
+    async def set_color(self, color):
+        '''Turns on the physical bulb using the wizlight package'''
+        # TODO: Color Differences between hue and WIZ lights.
+        super().set_color(color)
+        _rgb = translate_color(color)
+        _xy = rgb_to_xy(*_rgb)
+        if not self.bulb.on:
+            self.bulb.on = True
+        self.bulb.xy = _xy
+        self.bulb.brightness = 254
+        
+    async def reset(self):
+        '''Turns the light from special colors to default'''
+        await self.set_scene(self.__default_scene)
 
-if __name__ == '__main__':
-    from dotenv import load_dotenv
+def get_hue_lights_by_name(name):
+    b = Bridge(os.getenv('HUE_BRIDGE_IP'))
+    group_id = b.get_group_id_by_name(name)
+    lights = b.lights
+    filtered_lights = [l for l in lights if str(name) in l.name]
+    return [Hue(l, group_id) for l in filtered_lights]
 
-    load_dotenv()
-    BRIDGE_IP = os.getenv('HUE_BRIDGE_IP')  # Example IP; replace with your bridge's IP.
-    DEFAULT_SCENE = os.getenv('NORMAL_PARTY_SCENE')
-    NORMAL_SCENE = os.getenv('NORMAL_KITCHEN_SCENE')
-    KITCHEN_GROUP = os.getenv('KITCHEN_GROUP')
-
-    asyncio.run(end_party())
+def get_lights_by_group_name(name='Kitchen'):
+    b = Bridge(os.getenv('HUE_BRIDGE_IP'))
+    group_id = b.get_group_id_by_name(name)
+    group_lights = b.get_group(group_id).get('lights') # Only returns light ids
+    light_objects = [l for l in b.lights if str(l.light_id) in group_lights]
+    return [Hue(l, group_id) for l in light_objects]

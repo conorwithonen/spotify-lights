@@ -1,4 +1,17 @@
-{
-    "Lemonade": "Yellow",
-    "Raining Blood": "Red"
-}
+[
+    {
+        "songTitle": "Halloween",
+        "color": "Orange",
+        "delay_until": null
+    },
+    {
+        "songTitle": "Lemonade",
+        "color": "Yellow",
+        "delay_until": null
+    },
+    {
+        "songTitle": "Yeern 101",
+        "color": "Blue",
+        "delay_until": null
+    }
+]
