@@ -9,6 +9,7 @@ class Wiz(Light):
         super().__init__(ip, self.brand)
         self.bulb = wizlight(ip)
         self.__default_scene = 4
+        self.__default_speed = 14 # 1-200
         
     async def turn_on(self):
         super().turn_on()
@@ -18,10 +19,13 @@ class Wiz(Light):
         super().turn_off()
         await self.bulb.turn_off()
     
-    async def set_scene(self, _scene):
+    async def set_scene(self, _scene, _speed=None):
         # Wiz values Only 1 to 32. 4 is Party
         super().set_scene(_scene)
-        pb = PilotBuilder(scene=_scene)
+        if _speed:
+            pb = PilotBuilder(scene=_scene, speed=_speed)
+        else:
+            pb = PilotBuilder(scene=_scene)
         await self.bulb.turn_on(pb)
         
     async def set_color(self, color):
@@ -38,6 +42,6 @@ class Wiz(Light):
         # hardware_state = await self.bulb.updateState()
         # await self.set_scene(state.get_scene_id())
         # if self.scene != self.default_scene:
-        await self.set_scene(self.__default_scene)
+        await self.set_scene(self.__default_scene, self.__default_speed)
             
     

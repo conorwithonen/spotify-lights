@@ -26,3 +26,15 @@ class TestUtils(unittest.TestCase):
             utils.song_timestamp_to_ms('2:30'),
             150000
         )
+
+    def test_lookup_song(self):
+        test_songs = [
+            {'songTitle': 'sick', 'color': 'red'}
+        ]
+        song = utils.lookup_song(test_songs, 'sick')
+        self.assertIsNotNone(song)
+        self.assertEqual(song.get('songTitle'), 'sick')
+        
+        del song
+        song = utils.lookup_song(test_songs,'throwing bricks')
+        self.assertIsNone(song)

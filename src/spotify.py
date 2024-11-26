@@ -31,10 +31,12 @@ def get_currently_playing():
     song_name = current_playback['item']['name']
     artist_name = ', '.join(artist['name'] for artist in current_playback['item']['artists'])
     duration_ms = current_playback['item']['duration_ms']
+    progress_ms = current_playback['progress_ms']
     playback = {
         'artist': artist_name,
         'song': song_name,
-        'duration_ms': duration_ms
+        'duration_ms': duration_ms,
+        'progress_ms': progress_ms
     }
     return playback
 

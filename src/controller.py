@@ -1,10 +1,11 @@
 import os
-from src.utils import load_songs_file
+from src.utils import load_songs_file, lookup_song, song_timestamp_to_ms
 from src.lights import wiz, phillips
 import asyncio
 
 SONG_FILE = 'song_scenes.json'
-SPECIAL_COLORS = load_songs_file(SONG_FILE)
+SPECIAL_SONGS = load_songs_file(SONG_FILE)
+LATENCY_BUFFER_MS = 0
 
 # # Ugh
 hue_bulbs = phillips.get_hue_lights_by_name('Island')
@@ -46,9 +47,17 @@ async def update_lights(playback):
     playback -- dict of info from spotify
     '''
     song = playback.get('song')
-
-    if song in SPECIAL_COLORS:
-        new_color = SPECIAL_COLORS.get(song)
+    progress_ms = playback.get('progress_ms')
+    special_song = lookup_song(SPECIAL_SONGS, song)
+    if special_song:
+        # Gets wait time by substracting progress_ms from delay
+        new_color = special_song.get('color')
+        delay_until = special_song.get('delay_until')
+        if delay_until:
+            delay_ms = song_timestamp_to_ms(delay_until)
+            wait_time = delay_ms - progress_ms + LATENCY_BUFFER_MS
+            print(f'Delaying light change for {wait_time}ms. Buffer: {LATENCY_BUFFER_MS}ms')
+            await asyncio.sleep(wait_time / 1000)
         print(f'Changing lights to {new_color}')
         await change_registered_lights(*LIGHTS, color=new_color)
     else:
